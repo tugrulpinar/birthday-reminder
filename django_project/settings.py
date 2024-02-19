@@ -175,3 +175,17 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
+
+
+CELERY_BROKER_URL = os.getenv("REDIS_URL")
+CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
+
+CELERY_BEAT_SCHEDULE = {
+    "notify_customers": {
+        "task": "pages.tasks.notify_customers",
+        "schedule": 5,
+    }
+}
+
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
