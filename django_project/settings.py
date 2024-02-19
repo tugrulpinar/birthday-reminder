@@ -1,16 +1,19 @@
+import os
 from pathlib import Path
+import socket
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-SECRET_KEY
-SECRET_KEY = "django-insecure-0peo@#x9jur3!h$ryje!$879xww8y1y66jx!%*#ymhg&jkozs2"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
-DEBUG = True
+DEBUG = bool(os.getenv("DJANGO_DEBUG"))
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",")
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = [
@@ -70,25 +73,17 @@ TEMPLATES = [
     },
 ]
 
-# https://docs.djangoproject.com/en/dev/ref/settings/#databases
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "postgres",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "db",
+        "PORT": 5432,
     }
 }
-
-# For Docker/PostgreSQL usage uncomment this and comment the DATABASES config above
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "postgres",
-#         "USER": "postgres",
-#         "PASSWORD": "postgres",
-#         "HOST": "db",  # set in docker-compose.yml
-#         "PORT": 5432,  # default postgres port
-#     }
-# }
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -111,7 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#time-zone
-TIME_ZONE = "UTC"
+TIME_ZONE = "EST"
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-USE_I18N
 USE_I18N = True
@@ -142,13 +137,31 @@ STORAGES = {
 # https://django-crispy-forms.readthedocs.io/en/latest/install.html#template-packs
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Email
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+DEFAULT_FROM_EMAIL = os.getenv("DJANGO_DEFAULT_FROM_EMAIL")
+SERVER_EMAIL = os.getenv("DJANGO_SERVER_EMAIL")
+EMAIL_HOST = os.getenv("DJANGO_EMAIL_HOST")
+EMAIL_PORT = os.getenv("DJANGO_EMAIL_PORT")
+EMAIL_HOST_USER = os.getenv("DJANGO_EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("DJANGO_EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+SMTP_DEV = os.getenv("SMTP_DEV", 0)
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+
+if DEBUG and SMTP_DEV:
+    EMAIL_USE_TLS = False
+
+if DEBUG and not SMTP_DEV:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # django-debug-toolbar
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html
 # https://docs.djangoproject.com/en/dev/ref/settings/#internal-ips
-INTERNAL_IPS = ["127.0.0.1"]
+
+if DEBUG:
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[:-1] + "1" for ip in ips]
 
 # https://docs.djangoproject.com/en/dev/topics/auth/customizing/#substituting-a-custom-user-model
 AUTH_USER_MODEL = "accounts.CustomUser"
