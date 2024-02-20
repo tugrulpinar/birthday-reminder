@@ -9,7 +9,7 @@ COPY requirements.txt .
 
 RUN set -ex && \
     pip install --upgrade pip && \
-    pip install -r /tmp/requirements.txt && \
+    pip install -r requirements.txt && \
     rm -rf /root/.cache/
 
 COPY . .

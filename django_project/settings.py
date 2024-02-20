@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "debug_toolbar",
+    "bootstrap_datepicker_plus",
+    "bootstrap4",
     # Local
     "accounts",
     "pages",
