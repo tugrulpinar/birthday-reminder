@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "bootstrap_datepicker_plus",
     "bootstrap4",
+    "django_htmx",
     # Local
     "accounts",
     "pages",
@@ -43,6 +44,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # WhiteNoise
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.common.CommonMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",  # Django Debug Toolbar
     "django.middleware.csrf.CsrfViewMiddleware",

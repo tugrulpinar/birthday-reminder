@@ -16,7 +16,7 @@
 {% bootstrap_javascript jquery='full' %}
 
 {{ form.media }}
-<form method="POST" action=".">
+<form method="POST" action="." hx-boost="true">
   {% csrf_token %}
   {{ form|crispy }}
   <button type="submit" class="btn btn-primary"> Save </button>
@@ -25,7 +25,10 @@
 <div>
   <ul>
     {% for birth_day_record in birth_day_records %}
-    <li> {{ birth_day_record.name }} | {{ birth_day_record.date_of_birth }} </li>
+    <li> {{ birth_day_record.name }} | {{ birth_day_record.date_of_birth }}
+      <button class="btn btn-danger" hx-delete="{% url 'delete-record' birth_day_record.id  %}" hx-trigger="click"
+        hx-target="body"> Remove </button>
+    </li>
     {% endfor %}
   </ul>
 </div>
