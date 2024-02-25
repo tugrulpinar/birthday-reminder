@@ -10,19 +10,19 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      - db
+      - postgres
       - redis
     env_file:
       - .env
     container_name: web
 
-  db:
+  postgres:
     image: postgres:15.6
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-    container_name: db
+    container_name: postgres
 
   redis:
     image: redis
