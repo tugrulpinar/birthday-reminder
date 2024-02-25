@@ -2,20 +2,21 @@ import os
 from pathlib import Path
 import socket
 
+import environ
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-SECRET_KEY
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR, ".env"))
 
-# https://docs.djangoproject.com/en/dev/ref/settings/#debug
-DEBUG = bool(os.getenv("DJANGO_DEBUG"))
 
-# https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",")
+SECRET_KEY = env.str("DJANGO_SECRET_KEY")
 
-# https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
+DEBUG = env.bool("DJANGO_DEBUG")
+
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
+
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -81,13 +82,16 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "db",
+        "NAME": env.str("DB_NAME"),
+        "USER": env.str("DB_USER"),
+        "PASSWORD": env.str("DB_PASSWORD"),
+        "HOST": env.str("DB_HOST"),
         "PORT": 5432,
     }
 }
+
+CONN_MAX_AGE = None
+CONN_HEALTH_CHECKS = True
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -143,15 +147,15 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Email
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-DEFAULT_FROM_EMAIL = os.getenv("DJANGO_DEFAULT_FROM_EMAIL")
-SERVER_EMAIL = os.getenv("DJANGO_SERVER_EMAIL")
-EMAIL_HOST = os.getenv("DJANGO_EMAIL_HOST")
-EMAIL_PORT = os.getenv("DJANGO_EMAIL_PORT")
-EMAIL_HOST_USER = os.getenv("DJANGO_EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("DJANGO_EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = env.str("DJANGO_DEFAULT_FROM_EMAIL")
+SERVER_EMAIL = env.str("DJANGO_SERVER_EMAIL")
+EMAIL_HOST = env.str("DJANGO_EMAIL_HOST")
+EMAIL_PORT = env.str("DJANGO_EMAIL_PORT")
+EMAIL_HOST_USER = env.str("DJANGO_EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env.str("DJANGO_EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
-SMTP_DEV = os.getenv("SMTP_DEV", 0)
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+SMTP_DEV = env.bool("SMTP_DEV", 0)
+ADMIN_EMAIL = env.str("ADMIN_EMAIL")
 
 if DEBUG and SMTP_DEV:
     EMAIL_USE_TLS = False
@@ -194,8 +198,8 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 
 
-CELERY_BROKER_URL = os.getenv("REDIS_URL")
-CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
+CELERY_BROKER_URL = env.str("REDIS_URL")
+CELERY_RESULT_BACKEND = env.str("REDIS_URL")
 
 CELERY_BEAT_SCHEDULE = {
     "notify_customers": {
