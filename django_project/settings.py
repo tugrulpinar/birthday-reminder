@@ -122,13 +122,8 @@ USE_I18N = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#use-tz
 USE_TZ = True
 
-# https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-# https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
-
-# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # https://whitenoise.readthedocs.io/en/latest/django.html
@@ -186,10 +181,10 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 SITE_ID = 1
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "home"
+LOGIN_REDIRECT_URL = "landing-page"
 
 # https://django-allauth.readthedocs.io/en/latest/views.html#logout-account-logout
-ACCOUNT_LOGOUT_REDIRECT_URL = "home"
+ACCOUNT_LOGOUT_REDIRECT_URL = "landing-page"
 
 # https://django-allauth.readthedocs.io/en/latest/installation.html?highlight=backends
 AUTHENTICATION_BACKENDS = (

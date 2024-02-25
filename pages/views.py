@@ -17,8 +17,16 @@ from .forms import BirthDayRecordModelForm
 
 
 
+def landing_page(request):
+    if request.user.is_authenticated:
+        return redirect("profile")
+    
+    return render(request, "pages/landing_page.html")
+
+
+
 @login_required
-def list_create_birthday_records_view(request):
+def profile(request):
     birth_day_records = BirthDayRecord.objects.filter(user=request.user)
     form = BirthDayRecordModelForm()
 
@@ -35,7 +43,7 @@ def list_create_birthday_records_view(request):
     else:
         return render(
             request,
-            "pages/home.html",
+            "pages/profile.html",
             context={"birth_day_records": birth_day_records, "form": form},
         )
 
@@ -51,4 +59,15 @@ def delete_birthday_record_view(request, pk:int):
 
     record.delete()
 
-    return redirect("home")
+    return redirect("profile")
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_account_view(request):
+    logging.info(f"User {request.user} is deleting their account")
+    user = request.user
+    user.delete()
+
+    return redirect("landing-page")
+
