@@ -13,3 +13,6 @@ media
 
 # Virtual environment
 .venv
+
+celerybeat-schedule
+plan.txt

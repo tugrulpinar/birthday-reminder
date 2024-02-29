@@ -3,6 +3,7 @@ from pathlib import Path
 import socket
 
 import environ
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -18,6 +19,7 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -181,7 +183,7 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 SITE_ID = 1
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "landing-page"
+LOGIN_REDIRECT_URL = "profile"
 
 # https://django-allauth.readthedocs.io/en/latest/views.html#logout-account-logout
 ACCOUNT_LOGOUT_REDIRECT_URL = "landing-page"
@@ -198,16 +200,20 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_EMAIL_UNKNOWN_ACCOUNTS = False
+ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 
 
 CELERY_BROKER_URL = env.str("REDIS_URL")
 CELERY_RESULT_BACKEND = env.str("REDIS_URL")
 
+
 CELERY_BEAT_SCHEDULE = {
     "notify_customers": {
         "task": "pages.tasks.notify_customers",
-        "schedule": 5,
-    }
+        "schedule": crontab(minute=0, hour=6),  # Run daily at 6AM
+    },
 }
 
 

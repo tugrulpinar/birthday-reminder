@@ -1,16 +1,7 @@
 import logging
 
-from django.views.generic import (
-    TemplateView,
-    CreateView,
-    ListView,
-    UpdateView,
-    DeleteView,
-)
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.views.decorators.http import require_http_methods
 
 from .models import BirthDayRecord
 from .forms import BirthDayRecordModelForm
@@ -63,11 +54,11 @@ def delete_birthday_record_view(request, pk:int):
 
 
 @login_required
-@require_http_methods(["DELETE"])
 def delete_account_view(request):
-    logging.info(f"User {request.user} is deleting their account")
-    user = request.user
-    user.delete()
+    if request.method == "POST":
+        logging.info(f"User {request.user} is deleting their account")
+        user = request.user
+        user.delete()
+        return redirect("landing-page")
 
-    return redirect("landing-page")
-
+    return render(request, "pages/delete_account.html")
