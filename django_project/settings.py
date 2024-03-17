@@ -13,9 +13,10 @@ env.read_env(os.path.join(BASE_DIR, ".env"))
 
 SECRET_KEY = env.str("DJANGO_SECRET_KEY")
 
-DEBUG = env.bool("DJANGO_DEBUG")
+DEBUG = env.bool("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
+CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 
 INSTALLED_APPS = [
@@ -152,8 +153,8 @@ EMAIL_PORT = env.str("DJANGO_EMAIL_PORT")
 EMAIL_HOST_USER = env.str("DJANGO_EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env.str("DJANGO_EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
-SMTP_DEV = env.bool("SMTP_DEV", 0)
-ADMIN_EMAIL = env.str("ADMIN_EMAIL")
+SMTP_DEV = env.bool("SMTP_DEV", False)
+ADMIN_EMAIL = env.str("ADMIN_EMAIL", "")
 
 if DEBUG and SMTP_DEV:
     EMAIL_USE_TLS = False
@@ -208,7 +209,7 @@ CELERY_RESULT_EXTENDED = True
 CELERY_BEAT_SCHEDULE = {
     "notify_customers": {
         "task": "pages.tasks.notify_customers",
-        "schedule": crontab(minute=0, hour=6),  # Run daily at 6AM
+        "schedule": 5,  # Run daily at 6AM
     },
 }
 
