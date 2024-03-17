@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "bootstrap_datepicker_plus",
     "bootstrap4",
     "django_htmx",
+    'django_celery_results',
     # Local
     "accounts",
     "pages",
@@ -199,7 +200,9 @@ ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 
 
 CELERY_BROKER_URL = env.str("REDIS_URL")
-CELERY_RESULT_BACKEND = env.str("REDIS_URL")
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_RESULT_EXTENDED = True
 
 
 CELERY_BEAT_SCHEDULE = {
