@@ -7,11 +7,10 @@ WORKDIR /code
 
 COPY requirements.txt .
 
+RUN pip install --upgrade pip uv
+
 RUN set -ex && \
-    pip install --upgrade pip && \
-    pip install -r requirements.txt && \
+    uv pip install --system -r requirements.txt && \
     rm -rf /root/.cache/
 
 COPY . .
-
-CMD ["gunicorn", "--bind", ":8000", "--workers", "2", "django_project.wsgi"]
