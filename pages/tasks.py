@@ -23,12 +23,12 @@ def notify_customers():
 
     for birthday_record in birthdays_tomorrow:
         logger.info(f"Sending birthday reminder to user {birthday_record.user.id}!")
-        send_mail(
-            "Birthday Reminder!",
-            f"Tomorrow {tomorrow.day}/{tomorrow.month}/{tomorrow.year} is {birthday_record.name}'s Birth Day!",
-            settings.DEFAULT_FROM_EMAIL,
-            [birthday_record.user.email],
-        )
+        # send_mail(
+        #     "Birthday Reminder!",
+        #     f"Tomorrow {tomorrow.day}/{tomorrow.month}/{tomorrow.year} is {birthday_record.name}'s Birth Day!",
+        #     settings.DEFAULT_FROM_EMAIL,
+        #     [birthday_record.user.email],
+        # )
 
     logger.info("Done")
     return True
