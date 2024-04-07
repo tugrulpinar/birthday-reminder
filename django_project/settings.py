@@ -157,7 +157,7 @@ EMAIL_USE_TLS = True
 SMTP_DEV = env.bool("SMTP_DEV", False)
 ADMIN_EMAIL = env.str("ADMIN_EMAIL", "")
 
-if DEBUG and SMTP_DEV:
+if DEBUG:
     EMAIL_USE_TLS = False
 
 if DEBUG and not SMTP_DEV:
