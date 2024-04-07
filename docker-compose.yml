@@ -39,7 +39,6 @@ services:
       - .env
     depends_on:
       - redis
-      - mailhog
       - web
     container_name: celery-beat
 
@@ -52,7 +51,6 @@ services:
       - .env
     depends_on:
       - redis
-      - mailhog
       - web
     container_name: celery-worker
 

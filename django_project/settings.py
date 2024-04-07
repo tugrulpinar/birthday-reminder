@@ -4,6 +4,7 @@ import socket
 
 import environ
 from celery.schedules import crontab
+from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -11,7 +12,7 @@ env = environ.Env()
 env.read_env(os.path.join(BASE_DIR, ".env"))
 
 
-SECRET_KEY = env.str("DJANGO_SECRET_KEY")
+SECRET_KEY = env.str("SECRET_KEY", default=get_random_secret_key())
 
 DEBUG = env.bool("DJANGO_DEBUG", False)
 
@@ -84,7 +85,7 @@ TEMPLATES = [
 
 
 DATABASES = {
-    "default": env.db_url("DATABASE_URL")
+    "default": env.db()
 }
 
 CONN_MAX_AGE = None
