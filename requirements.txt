@@ -33,3 +33,6 @@ django-htmx==1.17.2
 django-environ==0.11.2
 django-jazzmin==2.6.0
 django-celery-results==2.5.1
+django-structlog==8.0.0
+snoop==0.4.3
+rich==13.7.1

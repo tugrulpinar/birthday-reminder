@@ -3,10 +3,12 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
+import structlog
 
 from .models import BirthDayRecord
 from .forms import BirthDayRecordModelForm
 
+logger = structlog.get_logger(__name__)
 
 
 def landing_page(request):
@@ -45,9 +47,9 @@ def profile(request):
 def delete_birthday_record_view(request, pk:int):
     record = BirthDayRecord.objects.filter(id=pk, user=request.user)
     if record:
-        logging.info(f"Deleting BirthDayRecord {pk} for {request.user}")
+        logger.info(f"Deleting BirthDayRecord {pk} for {request.user}")
     else:
-        logging.warning(f"User {request.user} is trying to delete a forbidden record")
+        logger.warning(f"User {request.user} is trying to delete a forbidden record")
 
     record.delete()
 
@@ -57,7 +59,7 @@ def delete_birthday_record_view(request, pk:int):
 @login_required
 def delete_account_view(request):
     if request.method == "POST":
-        logging.info(f"User {request.user} is deleting their account")
+        logger.info(f"User {request.user} is deleting their account")
         user = request.user
         user.delete()
         return redirect("landing-page")

@@ -5,6 +5,7 @@ import socket
 import environ
 from celery.schedules import crontab
 from django.core.management.utils import get_random_secret_key
+import structlog
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     "bootstrap4",
     "django_htmx",
     'django_celery_results',
+    "django_structlog",
     # Local
     "accounts",
     "pages",
@@ -58,6 +60,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",  # django-allauth
+    "django_structlog.middlewares.RequestMiddleware", # django-structlog
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
@@ -216,3 +219,156 @@ CELERY_BEAT_SCHEDULE = {
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+def clean_dev_console_processor(logger, method_name, event_dict):
+    """
+    Custom structlog processor to remove unnecessary information
+    for development console to make the output cleaner.
+    """
+
+    event_dict.pop("request_id", None)
+    event_dict.pop("ip", None)
+    event_dict.pop("user_id", None)
+    event_dict.pop("user_agent", None)
+    event_dict.pop("timestamp", None)
+    return event_dict
+
+
+timestamper = structlog.processors.TimeStamper(fmt="iso")
+
+shared_structlog_processors = [
+    structlog.contextvars.merge_contextvars,
+    structlog.stdlib.add_log_level,
+    structlog.stdlib.add_logger_name,
+    timestamper,
+]
+conditional_processors = (
+    [clean_dev_console_processor] if DEBUG else [structlog.processors.format_exc_info]
+)
+shared_structlog_processors += conditional_processors
+
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.UnicodeDecoder(),
+    ]
+    + shared_structlog_processors
+    + [
+        structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processors": [
+                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                structlog.processors.JSONRenderer(),
+            ],
+            "foreign_pre_chain": shared_structlog_processors,
+        },
+        "plain_console": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processors": [
+                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                structlog.dev.ConsoleRenderer(),
+            ],
+            "foreign_pre_chain": shared_structlog_processors,
+        },
+        "key_value": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processors": [
+                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                structlog.processors.KeyValueRenderer(
+                    key_order=["timestamp", "level", "event", "logger"]
+                ),
+            ],
+            "foreign_pre_chain": shared_structlog_processors,
+        },
+    },
+    "filters": {
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "plain_console",
+        },
+        "json_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+        },
+        "json_file": {
+            "class": "logging.handlers.WatchedFileHandler",
+            "formatter": "json",
+            "filename": "logs/json.log",
+        },
+        "flat_file": {
+            "class": "logging.handlers.WatchedFileHandler",
+            "formatter": "key_value",
+            "filename": "logs/flat_file.log",
+        },
+    },
+    "loggers": {
+        "root": {
+            "handlers": ["json_console"],
+            "level": "INFO",
+        },
+        "django_structlog": {
+            "level": "INFO",
+        },
+        "django": {
+            "level": "INFO",
+        },
+        "django.server": {
+            "handlers": ["json_console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "huey": {
+            "level": "INFO",
+        },
+        "appname": {
+            "level": "INFO",
+        },
+    },
+}
+
+if DEBUG:
+    LOGGING["loggers"]["root"] = {
+        "handlers": ["console", "json_file", "flat_file"],
+    }
+    LOGGING["loggers"]["django_structlog"] = {
+        "level": "CRITICAL",
+    }
+    LOGGING["loggers"]["django.server"] = {
+        "handlers": ["console"],
+        "level": "INFO",
+    }
+    LOGGING["loggers"]["appname"] = {
+        "level": "DEBUG",
+    }
+    # Uncomment to log SQL statements to console
+    # LOGGING["loggers"]["django.db.backends"] = {
+    #     "handlers": ["console"],
+    #     "level": "DEBUG",
+    #     "propagate": False,
+    # }
+
+    import snoop
+
+    snoop.install()
+
+    from rich.traceback import install as install_rich_traceback
+
+    install_rich_traceback(show_locals=True)
