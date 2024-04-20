@@ -4,3 +4,5 @@ fly.toml
 .env
 .venv
 celerybeat-schedule
+Procfile
+runtime.txt

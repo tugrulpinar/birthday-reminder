@@ -18,3 +18,5 @@ celerybeat-schedule
 plan.txt
 
 .env
+
+notes.txt
